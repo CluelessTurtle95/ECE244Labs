@@ -69,7 +69,12 @@ int main() {
         // Read from string stream into the command
         // The only way this can fail is if the eof is encountered
         lineStream >> command;
-
+        
+        //cout << "Entire Stream : " ;
+        //if(!lineStream.eof())
+        //    cout << lineStream.rdbuf() << endl;
+        //else
+        //    cout << endl;
         // Check for the command and act accordingly
         // ECE244 Student: Insert your code here
         
@@ -101,7 +106,7 @@ int main() {
         }
         else
         {
-            cout << "invalid command" << endl;
+            cout << "Error: invalid command" << endl;
         }
 
         // Once the command has been processed, prompt for the
@@ -160,7 +165,15 @@ void Parser::setStream(stringstream & lStream)
     angle = 0;
     name = "";
     type = "";
+    lineStream.str("");
+    resetArgs();
     lineStream << lStream.rdbuf();
+    lineStream.clear();
+//    cout << "Entire Stream : " ;
+//    if(!lineStream.eof())
+//        cout << lStream.rdbuf() << endl;
+//    else
+//        cout << endl;
 }
 
 void Parser::maxShapes()
@@ -178,6 +191,7 @@ void Parser::maxShapes()
 
 void Parser::create()
 {
+    //cout << "Entire Stream : " << lineStream.rdbuf() << endl;
     lineStream >> name >> type >> locx >> locy >> sizex >> sizey;
     checkArgs();
 
@@ -186,9 +200,19 @@ void Parser::create()
     {
         cout << "Error: invalid shape name" << endl;
     }
+    else if(name == "")
+    {
+        //cout << "im here";
+        cout << "Error: too few arguments" << endl;
+    }
     else if( (type != "ellipse") & (type != "rectangle") & (type != "triangle") )
     {
-        cout << "Error: invalid shape type" << endl;
+        if(type == "")
+        {
+            cout << "Error: too few arguments" << endl;
+        }
+        else
+            cout << "Error: invalid shape type" << endl;
     }
     else if(invArg)
     {
@@ -236,28 +260,32 @@ void Parser::move()
     {
         cout << "Error: invalid shape name" << endl;
     }
-    else if (locx < 0 || locy < 0)
-    {
-        cout << "Error: invalid value" << endl;
-    }
-    else if(invArg)
-    {
-        cout << "Error: invalid argument" << endl;
-    }
-    else if(toofew)
+    else if(name == "")
     {
         cout << "Error: too few arguments" << endl;
     }
-    else if(toomany)
+    else if (locx < 0 || locy < 0)
     {
-        cout << "Error: too many arguments" << endl;
+        cout << "Error: invalid value" << endl;
     }
     else
     {
         int tempInt = searchDatabase(name);
         if (tempInt == -1)
         {
-            cout << "Error: shape name not found" << endl;
+            cout << "Error: shape " << name << " not found" << endl;
+        }
+        else if(invArg)
+        {
+            cout << "Error: invalid argument" << endl;
+        }
+        else if(toofew)
+        {
+            cout << "Error: too few arguments" << endl;
+        }
+        else if(toomany)
+        {
+            cout << "Error: too many arguments" << endl;
         }
         else
         {
@@ -281,28 +309,32 @@ void Parser::rotate()
     {
         cout << "invalid shape name" << endl;
     }
-    else if (angle < 0 || angle > 360)
-    {
-        cout << "invalid value" << endl;
-    }
-    else if(invArg)
-    {
-        cout << "Error: invalid argument" << endl;
-    }
-    else if(toofew)
+    else if(name == "")
     {
         cout << "Error: too few arguments" << endl;
     }
-    else if(toomany)
+    else if (angle < 0 || angle > 360)
     {
-        cout << "Error: too many arguments" << endl;
+        cout << "Error: invalid value" << endl;
     }
     else
     {
         int tempInt = searchDatabase(name);
         if (tempInt == -1)
         {
-            cout << "Error: shape name not found" << endl;
+            cout << "Error: shape " << name << " not found" << endl;
+        }
+            else if(invArg)
+        {
+            cout << "Error: invalid argument" << endl;
+        }
+        else if(toofew)
+        {
+            cout << "Error: too few arguments" << endl;
+        }
+        else if(toomany)
+        {
+            cout << "Error: too many arguments" << endl;
         }
         else
         {
@@ -321,47 +353,64 @@ void Parser::draw()
     lineStream >> name;
     checkArgs();
 
-
     if (name == "ellipse" || name == "rectangle" || name == "triangle" || name == "maxShapes"
             || name == "create" || name == "move" || name == "rotate" || name == "draw" || name == "delete")
     {
         cout << "Error: invalid shape name" << endl;
     }
-    else if(invArg)
-    {
-        cout << "Error: invalid argument" << endl;
-    }
-    else if(toofew)
+    else if(name == "")
     {
         cout << "Error: too few arguments" << endl;
     }
-    else if(toomany)
-    {
-        cout << "Error: too many arguments" << endl;
-    }
     else if (name == "all")
     {
-        for (int i = 0; i < max_shapes; i++)
+        if(invArg)
         {
-            if(shapesArray[i] == nullptr)
-                continue;
-            shapesArray[i]->draw();
+            cout << "Error: invalid argument" << endl;
         }
-        cout << "Drew all shapes" << endl;
+        else if(toofew)
+        {
+            cout << "Error: too few arguments" << endl;
+        }
+        else if(toomany)
+        {
+            cout << "Error: too many arguments" << endl;
+        }
+        else
+        {
+            cout << "Drew all shapes" << endl;
+            for (int i = 0; i < max_shapes; i++)
+            {
+                if(shapesArray[i] == nullptr)
+                    continue;
+                shapesArray[i]->draw();
+            }
+        }
     }
     else
     {
         int tempInt = searchDatabase(name);
         if (tempInt == -1)
         {
-            cout << "Error: shape name not found" << endl;
+            cout << "Error: shape " << name << " not found" << endl;
+        }
+        else if(invArg)
+        {
+            cout << "Error: invalid argument" << endl;
+        }
+        else if(toofew)
+        {
+            cout << "Error: too few arguments" << endl;
+        }
+        else if(toomany)
+        {
+            cout << "Error: too many arguments" << endl;
         }
         else
         {
             shape * temp = shapesArray[tempInt];
+            cout << "Drew " << name << endl;
             temp->draw();
-            cout << "Drew " << temp->getName() << ": " << temp->getType() << " " << temp->getXlocation() 
-                 << " " << temp->getYlocation() << " " <<  temp->getXsize() << " " << temp->getYsize() << endl;
         }
     }
 
@@ -379,43 +428,64 @@ void Parser::del()
     {
         cout << "Error: invalid shape name" << endl;
     }
-    else if(invArg)
-    {
-        cout << "Error: invalid argument" << endl;
-    }
-    else if(toofew)
+    else if(name == "")
     {
         cout << "Error: too few arguments" << endl;
     }
-    else if(toomany)
-    {
-        cout << "Error: too many arguments" << endl;
-    }
     else if (name == "all")
     {
-        for (int i = 0; i < max_shapes; i++)
+        if(invArg)
         {
-            if(shapesArray[i] == nullptr)
-                continue;
-            delete shapesArray[i];
-            shapesArray[i] = nullptr;
+            cout << "Error: invalid argument" << endl;
         }
-        cout << "Deleted: all shapes" << endl;
+        else if(toofew)
+        {
+            cout << "Error: too few arguments" << endl;
+        }
+        else if(toomany)
+        {
+            cout << "Error: too many arguments" << endl;
+        }
+        else
+        {
+            cout << "Deleted: all shapes" << endl;
+            for (int i = 0; i < max_shapes; i++)
+            {
+                if(shapesArray[i] == nullptr)
+                    continue;
+                delete shapesArray[i];
+                shapesArray[i] = nullptr;
+            }
+        }
     }
     else
     {
         int tempInt = searchDatabase(name);
         if (tempInt == -1)
         {
-            cout << "Error: shape name not found" << endl;
+            cout << "Error: shape " << name << " not found" << endl;
+        }
+        else if(invArg)
+        {
+            cout << "Error: invalid argument" << endl;
+        }
+        else if(toofew)
+        {
+            cout << "Error: too few arguments" << endl;
+        }
+        else if(toomany)
+        {
+            cout << "Error: too many arguments" << endl;
         }
         else
         {
+            cout << "Deleted shape " << name << endl;
             delete shapesArray[tempInt];
             shapesArray[tempInt] = nullptr;
-            cout << "Deleted: name: type loc loc size size" << endl;
         }
     }
+    lineStream.clear();
+    lineStream.str("");
 }
 
 void initShape()

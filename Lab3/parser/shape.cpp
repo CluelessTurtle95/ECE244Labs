@@ -83,7 +83,7 @@ void shape::setYsize(int y_sz)
 
 void shape::draw() 
 {
-    
+    cout << name << ": " << type << " " << x_location << " " << y_location << " " <<  x_size << " " << y_size << endl;
 }
 
 shape::shape(string n, string t, int x_loc, int y_loc, int x_sz, int y_sz)
