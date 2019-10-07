@@ -28,11 +28,21 @@ int max_shapes;
 // ECE244 Student: you may want to add the prototype of
 // helper functions you write here
 
+void initShape();
+int addToDataBase(string name, string type , int xloc , int yloc , int xsz , int ysz);
+int searchDatabase(string name);
+
 class Parser
 {
     static stringstream lineStream;
     static string name,type;
     static int locx,locy,sizex,sizey,angle;
+    static bool invArg;
+    static bool toofew;
+    static bool toomany;
+
+    static void checkArgs();
+    static void resetArgs();
 public:
     static void setStream(stringstream & lStream);
     static void maxShapes();
@@ -107,6 +117,39 @@ int main() {
 stringstream Parser::lineStream;
 string Parser::name, Parser::type ;
 int Parser::locx,Parser::locy,Parser::sizex,Parser::sizey, Parser::angle;
+bool Parser::invArg = false,  Parser::toofew = false, Parser::toomany = false;
+
+void Parser::resetArgs()
+{
+    invArg = false;
+    toofew = false;
+    toomany = false;
+}
+
+void Parser::checkArgs()
+{
+    resetArgs();
+    if (lineStream.fail())
+    {
+        if(lineStream.eof())
+        {
+            toofew = true;
+        }
+        else
+        {
+            invArg = true;
+        }
+    }
+    else if(lineStream.peek() == '.')
+    {
+        invArg = true;
+    }
+    {
+        string temp;
+        lineStream >> temp;
+        toomany = !lineStream.fail(); 
+    }   
+}
 
 void Parser::setStream(stringstream & lStream)
 {   
@@ -124,13 +167,9 @@ void Parser::maxShapes()
 {
     int temp;
     lineStream >> temp;
-    //if (temp < 0 || lineStream.fail())
-    //{
-    //    cout << "invalid argument" << endl;
-    //}
-    //else
     {
         max_shapes = temp;
+        initShape();
         cout << "New database:  max shapes is " << max_shapes << endl;
     }
     lineStream.clear();
@@ -139,46 +178,50 @@ void Parser::maxShapes()
 
 void Parser::create()
 {
-    bool invArg = false;
-    bool toofew = false;
     lineStream >> name >> type >> locx >> locy >> sizex >> sizey;
-    if (lineStream.fail())
-    {
-        if(lineStream.eof())
-        {
-            toofew = true;
-        }
-        else
-        {
-            invArg = true;
-        }
-        //cout << "im here";
-    }
+    checkArgs();
+
     if (name == "ellipse" || name == "rectangle" || name == "triangle" || name == "maxShapes"
             || name == "create" || name == "move" || name == "rotate" || name == "draw" || name == "delete")
     {
-        cout << "invalid shape name" << endl;
+        cout << "Error: invalid shape name" << endl;
     }
-    else if(type != "ellipse" & type != "rectangle" & type != "triangle")
+    else if( (type != "ellipse") & (type != "rectangle") & (type != "triangle") )
     {
-        cout << "invalid shape type" << endl;
+        cout << "Error: invalid shape type" << endl;
     }
     else if(invArg)
     {
-        cout << "invalid argument" << endl;
+        cout << "Error: invalid argument" << endl;
     }
     else if(toofew)
     {
-        cout << "too few arguments" << endl;
+        cout << "Error: too few arguments" << endl;
+    }
+    else if(toomany)
+    {
+        cout << "Error: too many arguments" << endl;
     }
     else if (locx < 0 || locy < 0 || sizex < 0 || sizey < 0)
     {
-        cout << "invalid value" << endl;
+        cout << "Error: invalid value" << endl;
     }
     else
     {
-        cout << "Created " << name << ": " << type << " " << locx << " " << locy << " " << sizex << " " << sizey << endl;
+        if (searchDatabase(name) != -1)
+        {
+            cout << "Error: shape name exists" << endl;
+        }
+        else if(addToDataBase(name,type,locx,locy,sizex,sizey) == -1)
+        {
+            cout << "Error: shape array is full" << endl;
+        }
+        else
+        {
+            cout << "Created " << name << ": " << type << " " << locx << " " << locy << " " << sizex << " " << sizey << endl;
+        }
     }
+
     lineStream.clear();
     lineStream.str("");
 }
@@ -186,20 +229,53 @@ void Parser::create()
 void Parser::move()
 {
     lineStream >> name >> locx >> locy;
+    checkArgs();
+
     if (name == "ellipse" || name == "rectangle" || name == "triangle" || name == "maxShapes"
             || name == "create" || name == "move" || name == "rotate" || name == "draw" || name == "delete")
     {
-        cout << "invalid shape name" << endl;
+        cout << "Error: invalid shape name" << endl;
     }
     else if (locx < 0 || locy < 0)
-        cout << "invalid value" << endl;
-    cout << "Moved " << name << " to " << locx << " " << locy << endl;
+    {
+        cout << "Error: invalid value" << endl;
+    }
+    else if(invArg)
+    {
+        cout << "Error: invalid argument" << endl;
+    }
+    else if(toofew)
+    {
+        cout << "Error: too few arguments" << endl;
+    }
+    else if(toomany)
+    {
+        cout << "Error: too many arguments" << endl;
+    }
+    else
+    {
+        int tempInt = searchDatabase(name);
+        if (tempInt == -1)
+        {
+            cout << "Error: shape name not found" << endl;
+        }
+        else
+        {
+            shape * temp = shapesArray[tempInt];
+            temp->setXlocation(locx);
+            temp->setYlocation(locy);
+            cout << "Moved " << name << " to " << locx << " " << locy << endl;   
+        }
+    }
+    lineStream.clear();
     lineStream.str("");
 }
 
 void Parser::rotate()
 {
     lineStream >> name >> angle;
+    checkArgs();
+
     if (name == "ellipse" || name == "rectangle" || name == "triangle" || name == "maxShapes"
             || name == "create" || name == "move" || name == "rotate" || name == "draw" || name == "delete")
     {
@@ -209,46 +285,171 @@ void Parser::rotate()
     {
         cout << "invalid value" << endl;
     }
+    else if(invArg)
+    {
+        cout << "Error: invalid argument" << endl;
+    }
+    else if(toofew)
+    {
+        cout << "Error: too few arguments" << endl;
+    }
+    else if(toomany)
+    {
+        cout << "Error: too many arguments" << endl;
+    }
     else
     {
-        cout << "Rotated " << name << " by " << angle << " degrees" << endl;
+        int tempInt = searchDatabase(name);
+        if (tempInt == -1)
+        {
+            cout << "Error: shape name not found" << endl;
+        }
+        else
+        {
+            shape * temp = shapesArray[tempInt];
+            temp->setRotate(angle);
+            cout << "Rotated " << name << " by " << angle << " degrees" << endl;
+        }
     }
+
+    lineStream.clear();
     lineStream.str("");
 }
 
 void Parser::draw()
 {
     lineStream >> name;
+    checkArgs();
+
+
     if (name == "ellipse" || name == "rectangle" || name == "triangle" || name == "maxShapes"
             || name == "create" || name == "move" || name == "rotate" || name == "draw" || name == "delete")
     {
-        cout << "invalid shape name" << endl;
+        cout << "Error: invalid shape name" << endl;
     }
-    if (name == "all")
+    else if(invArg)
     {
-        cout << "Drew all shape" << endl;
+        cout << "Error: invalid argument" << endl;
+    }
+    else if(toofew)
+    {
+        cout << "Error: too few arguments" << endl;
+    }
+    else if(toomany)
+    {
+        cout << "Error: too many arguments" << endl;
+    }
+    else if (name == "all")
+    {
+        for (int i = 0; i < max_shapes; i++)
+        {
+            if(shapesArray[i] == nullptr)
+                continue;
+            shapesArray[i]->draw();
+        }
+        cout << "Drew all shapes" << endl;
     }
     else
     {
-        cout << "Drew name: type loc loc size size" << endl;
+        int tempInt = searchDatabase(name);
+        if (tempInt == -1)
+        {
+            cout << "Error: shape name not found" << endl;
+        }
+        else
+        {
+            shape * temp = shapesArray[tempInt];
+            temp->draw();
+            cout << "Drew " << temp->getName() << ": " << temp->getType() << " " << temp->getXlocation() 
+                 << " " << temp->getYlocation() << " " <<  temp->getXsize() << " " << temp->getYsize() << endl;
+        }
     }
+
+    lineStream.clear();
     lineStream.str("");
 }
 
 void Parser::del()
 {
     lineStream >> name;
+    checkArgs();
+
     if (name == "ellipse" || name == "rectangle" || name == "triangle" || name == "maxShapes"
             || name == "create" || name == "move" || name == "rotate" || name == "draw" || name == "delete")
     {
-        cout << "invalid shape name" << endl;
+        cout << "Error: invalid shape name" << endl;
     }
-    if (name == "all")
+    else if(invArg)
     {
+        cout << "Error: invalid argument" << endl;
+    }
+    else if(toofew)
+    {
+        cout << "Error: too few arguments" << endl;
+    }
+    else if(toomany)
+    {
+        cout << "Error: too many arguments" << endl;
+    }
+    else if (name == "all")
+    {
+        for (int i = 0; i < max_shapes; i++)
+        {
+            if(shapesArray[i] == nullptr)
+                continue;
+            delete shapesArray[i];
+            shapesArray[i] = nullptr;
+        }
         cout << "Deleted: all shapes" << endl;
     }
     else
     {
-        cout << "Deleted: name: type loc loc size size" << endl;
+        int tempInt = searchDatabase(name);
+        if (tempInt == -1)
+        {
+            cout << "Error: shape name not found" << endl;
+        }
+        else
+        {
+            delete shapesArray[tempInt];
+            shapesArray[tempInt] = nullptr;
+            cout << "Deleted: name: type loc loc size size" << endl;
+        }
     }
+}
+
+void initShape()
+{
+    shapesArray = new shape* [max_shapes];
+    for (int i = 0; i < max_shapes; i++)
+    {
+        shapesArray[i] = nullptr;
+    }
+}
+
+int searchDatabase(string name)
+{
+    //shapesArray;
+    for (int i = 0; i < max_shapes; i++)
+    {
+        if(shapesArray[i] == nullptr)
+            continue;
+        if (shapesArray[i]->getName() == name)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int addToDataBase(string name, string type , int xloc , int yloc , int xsz , int ysz)
+{
+    shape * temp = new shape(name, type , xloc , yloc , xsz , ysz);
+    if (shapeCount < max_shapes)
+    {
+        shapesArray[shapeCount] = temp;
+        shapeCount++;
+        return 0;
+    }
+    return -1;
 }
