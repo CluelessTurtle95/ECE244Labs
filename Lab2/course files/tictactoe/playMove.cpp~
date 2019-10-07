@@ -1,0 +1,144 @@
+//
+//  playMove.cpp
+//  TicTacTo
+//
+//  Updated by Tarek Abdelrahman on 2019-06-07.
+//  Created by Tarek Abdelrahman on 2018-05-15.
+//  Copyright © 2018-2019 Tarek Abdelrahman. All rights reserved.
+//
+
+#include "tictactoe.h"
+#include "gameState.h"
+
+//#include <iostream>
+bool first = true;
+
+void playMove(gameState& game_state) {
+    //std::cout << Empty;
+    if(first)
+    for (int r = 0 ; r < boardSize ; r++)
+    {
+	for(int c = 0 ; c < boardSize; c++)
+	{
+	    //if(game_state.get_gameBoard(r,c) != X && game_state.get_gameBoard(r,c) != O )
+	    //{
+		game_state.set_gameBoard(r,c,Empty);
+		//std::cout << game_state.get_gameBoard(r,c) << "  .  ";
+	    //}
+	}
+    }
+    first = false;
+    int row = game_state.get_clickedRow();
+    int col = game_state.get_clickedColumn();
+    int player = game_state.get_turn()? X:O;
+    int winCode = 0;
+    int counter = 0;
+    game_state.set_winCode(winCode);
+    if(game_state.get_gameBoard(row,col) == Empty)
+    {
+        // Valid Move
+        game_state.set_gameBoard(row,col, player);
+        game_state.set_moveValid(true);
+	game_state.set_turn(!game_state.get_turn());
+    }
+    else
+    {
+	//std::cout << "------->" << game_state.get_gameBoard(row,col)  << std::endl;
+        game_state.set_moveValid(false);
+        return ;
+    }
+    game_state.set_gameOver(true);
+    for(int r = 0; r < boardSize; r++)
+    {
+        for(int c=0; c < boardSize; c++)
+        {
+            if(game_state.get_gameBoard(r,c) == Empty)
+                game_state.set_gameOver(false);
+        }
+    }
+    for(int r = 0; r < boardSize; r++)
+    {
+        counter = 0;
+        for(int c=0; c < boardSize; c++)
+        {
+            if(game_state.get_gameBoard(r,c) != player)
+            {
+                break;
+            }
+            counter++;
+        }
+        if(counter == boardSize)
+        {
+            winCode = r+1;
+            break;
+        }
+    }
+    if(winCode)
+    {
+        game_state.set_winCode(winCode);
+        game_state.set_turn(!game_state.get_turn());
+        game_state.set_gameOver(true);
+	return;
+    }
+    for(int c = 0; c < boardSize; c++)
+    {
+        counter = 0;
+        for(int r=0; r < boardSize; r++)
+        {
+            if(game_state.get_gameBoard(r,c) != player)
+            {
+                break;
+            }
+            counter++;
+        }
+        if(counter == boardSize)
+        {
+            winCode = c+4;
+            break;
+        }
+    }
+    if(winCode)
+    {
+        game_state.set_winCode(winCode);
+        game_state.set_turn(!game_state.get_turn());
+        game_state.set_gameOver(true);
+	return;
+    }
+    counter = 0;
+    for(int i=0 ; i < boardSize; i++)
+    {
+        if(game_state.get_gameBoard(i,i) != player)
+        {
+            break;
+        }
+        counter++;
+    }
+    if(counter==boardSize)
+    {
+        winCode = 7;
+    }
+    counter = 0;
+    for(int i=0 ; i < boardSize; i++)
+    {
+        if(game_state.get_gameBoard(boardSize - i -1 ,i) != player)
+        {
+            break;
+        }
+        counter++;
+    }
+    if(counter==boardSize)
+    {
+    	winCode = 8;
+    }
+    if(winCode)
+    {
+        game_state.set_winCode(winCode);
+        game_state.set_turn(!game_state.get_turn());
+        game_state.set_gameOver(true);
+	return;
+    }
+    
+    //std::cout << "\n\n gfdgdfgdfgdgfdgdf    " << winCode << "   dgfdfdfdbfd" << game_state.get_winCode() << " \n\n" ;
+    game_state.set_winCode(0);
+}
+
