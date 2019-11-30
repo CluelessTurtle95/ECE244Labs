@@ -7,27 +7,26 @@ AsteroidListItem::AsteroidListItem() {
 }
 
 AsteroidListItem::AsteroidListItem(Asteroid a) {
-	this->next = nullptr;
-	this->data = &a;
+    this->next = nullptr;
+    this->data = new Asteroid(a);
 }
 
 AsteroidListItem::~AsteroidListItem() {
     delete data;
-    delete next; // Not sure about this
 }
 
 AsteroidList::AsteroidList()
 {
-    //head = AsteroidListItem();
+    head.setNext(nullptr);
 }
 
 AsteroidList::AsteroidList(const AsteroidList& src)
 {
-    AsteroidListItem * current = (AsteroidListItem *)src.head.getNext();
-    AsteroidListItem * saver = & head;
+    const AsteroidListItem * current = src.begin();
+    AsteroidListItem * saver = beforeBegin();
     AsteroidListItem * newNext;
     Asteroid * tmp;
-    while(current->hasNext())
+    while(current != nullptr)
     {
         tmp = new Asteroid(current->getData());
         newNext = new AsteroidListItem(*tmp);
@@ -43,12 +42,7 @@ AsteroidList::AsteroidList(const AsteroidList& src)
 }
 
 AsteroidList::~AsteroidList() {
-    AsteroidListItem * current;
-    if(head.hasNext())
-    {
-        current = head.getNext();
-        delete current;
-    }
+    clear();
 	// The functions in this class are listed in a suggested order of implementation,
 	// except for this one and the copy constructor (because you should put all your constructors together).
 }
@@ -56,15 +50,15 @@ AsteroidList::~AsteroidList() {
 void AsteroidList::pushFront(Asteroid e) {
     AsteroidListItem * newItem = new AsteroidListItem(e);
     newItem->setNext(head.getNext());
-    head.setNext(newItem);
+    beforeBegin()->setNext(newItem);
 }
 
 Asteroid& AsteroidList::front() {
-	return *(Asteroid*)&head.getNext()->getData();
+	return  (begin()->getData());
 }
 
 const Asteroid& AsteroidList::front() const {
-	return *(const Asteroid*)&head.getNext()->getData();
+	return  (begin()->getData());
 }
 
 bool AsteroidList::isEmpty() const {
@@ -83,27 +77,35 @@ int AsteroidList::size() const {
 }
 
 AsteroidListItem* AsteroidList::beforeBegin() {
-	return nullptr;
+	return &head;
 }
 
 const AsteroidListItem* AsteroidList::beforeBegin() const {
-	return nullptr;
+	return &head;
 }
 
 AsteroidListItem* AsteroidList::begin() {
-	return nullptr;
+	return head.getNext();
 }
 
 const AsteroidListItem* AsteroidList::begin() const {
-	return nullptr;
+	return head.getNext();
 }
 
 AsteroidListItem* AsteroidList::beforeEnd() {
-	return nullptr;
+    int sz = size();
+    AsteroidListItem * current = (AsteroidListItem *)&head;
+    for(int i = 0 ;i < sz ; i++)
+        current = current->getNext();
+    return current;
 }
 
 const AsteroidListItem* AsteroidList::beforeEnd() const {
-	return nullptr;
+    int sz = size();
+    AsteroidListItem * current = (AsteroidListItem *)&head;
+    for(int i = 0 ;i < sz ; i++)
+        current = current->getNext();
+    return current;
 }
 
 AsteroidListItem* AsteroidList::end() {
@@ -115,20 +117,51 @@ const AsteroidListItem* AsteroidList::end() const {
 }
 
 AsteroidListItem* AsteroidList::insertAfter(AsteroidListItem* prev, Asteroid e) {
-	return nullptr;
+    AsteroidListItem * saver = prev->getNext();
+    AsteroidListItem * p = new AsteroidListItem(e);
+    prev->setNext(p);
+    p->setNext(saver);
+    return p;
 }
 
 AsteroidListItem* AsteroidList::insertAfter(AsteroidListItem* prev, const AsteroidList& others) {
-	return nullptr;
+    AsteroidList* newCopies = new AsteroidList(others);
+    AsteroidListItem* firstnew = newCopies->begin();
+    if (firstnew == nullptr)
+        return prev;
+    AsteroidListItem * saver = prev->getNext();
+    AsteroidListItem* lastnew = firstnew;
+    
+    prev->setNext(firstnew);
+    while(lastnew->getNext() != nullptr)
+        lastnew = lastnew->getNext();
+    lastnew->setNext(saver);
+    return lastnew;
 }
 
 AsteroidListItem* AsteroidList::eraseAfter(AsteroidListItem* prev) {
-	return nullptr;
+    AsteroidListItem * saver = prev->getNext();
+    prev->setNext(prev->getNext()->getNext());
+    delete saver;
+    return prev->getNext();
 }
 
 void AsteroidList::clear() {
+    AsteroidListItem * current = begin();
+    AsteroidListItem * tmp = nullptr;
+    while(current != nullptr)
+    {
+        tmp = current;
+        current = current->getNext();
+        delete tmp;
+    }
+    head.setNext(nullptr);
 }
 
 AsteroidList& AsteroidList::operator=(const AsteroidList& src) {
-	return *(AsteroidList*)nullptr;
+    if(this==&src) 
+        return *this;
+    clear();
+    insertAfter(&head, src);
+    return *this;
 }

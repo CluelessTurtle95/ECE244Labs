@@ -76,6 +76,9 @@
         <dependencyChecking>false</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
+      <flagsDictionary>
+        <element flagsID="0" commonFlags="-std=c++14 -pedantic"/>
+      </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
       <makefileType>
@@ -84,12 +87,33 @@
           <buildCommand>${MAKE} BUILD_MODE=debug</buildCommand>
           <cleanCommand>${MAKE} clean BUILD_MODE=debug</cleanCommand>
           <executablePath>build/EXE/debug/test_galaxy-explorer</executablePath>
+          <ccTool>
+            <incDir>
+              <pElem>src</pElem>
+              <pElem>/share/copy/ece244f/lab4/src</pElem>
+              <pElem>/share/copy/ece244f/SFML-2.4.2/include</pElem>
+            </incDir>
+          </ccTool>
         </makeTool>
         <preBuild>
           <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="src/galaxy-explorer/AsteroidList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="11">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <item path="src/galaxy-explorer/AsteroidsObserver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="11">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
     </conf>
     <conf name="Release_Main" type="0">
       <toolsSet>
