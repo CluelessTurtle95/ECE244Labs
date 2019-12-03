@@ -196,8 +196,19 @@ bool TreeDB::remove(string name, TreeNode* parent, TreeNode * prev_parent) {
             // Find Max Node Left
             TreeNode * maxLeft = findMax(parent->getLeft(), true);
             // Replace
-            maxLeft->setRight(parent->getRight());
-            maxLeft->setLeft(parent->getLeft());
+            if(parent->getRight() != maxLeft)
+                maxLeft->setRight(parent->getRight());
+            else
+            {
+                maxLeft->setRight(nullptr);
+            }
+            if(parent->getLeft() != maxLeft)
+                maxLeft->setLeft(parent->getLeft());
+            else
+            {
+                maxLeft->setLeft(nullptr);
+            }
+            
             if(prev_parent != nullptr)
                 findAndSet(prev_parent,parent,maxLeft);
             else
