@@ -22,7 +22,15 @@ bool TreeDB::insert(DBentry* newEntry) {
         return true;
     }
     else         
-        return insert(newNode, root);
+        if(insert(newNode, root))
+        {
+            return true;
+        }
+        else
+        {
+            delete newNode;
+            return false;
+        }
 }
 
 bool TreeDB::insert(TreeNode* newNode, TreeNode* parent) {
