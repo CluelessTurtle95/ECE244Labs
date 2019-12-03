@@ -197,6 +197,7 @@ bool TreeDB::remove(string name, TreeNode* parent, TreeNode * prev_parent) {
                 findAndSet(prev_parent, parent, nextNode);
             else
                 root = nextNode;
+            delete parent;
         }
         else
         {

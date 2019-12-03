@@ -7,7 +7,7 @@ remove www.bing.com
 printprobes www.amazon.com
 printprobes www.cnn.com
 remove www.amazon.com
-printprobes www.cnn.com
-printall
-remove www.cnn.com
-printall
+1printprobes www.cnn.com
+1printall
+1remove www.cnn.com
+1printall
